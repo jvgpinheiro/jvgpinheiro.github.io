@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "baseUrl": "./app",
+        "outDir": "./",
+        "noImplicitAny": true,
+        "module": "es6",
+        "target": "es5",
+        "jsx": "react",
+        "moduleResolution": "Node",
+        "strict": true,
+        "experimentalDecorators": true,
+        "typeRoots": ["./node_modules/@types", "./app/@types"]
+    },
+    "exclude": ["./node_modules"]
+}
