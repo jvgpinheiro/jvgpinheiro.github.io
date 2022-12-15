@@ -22,7 +22,7 @@ module.exports = merge(baseConfig, {
                 removeComments: true,
             },
         }),
-        new CleanWebpackPlugin({ cleanOnceBeforeBuildPatterns: ['./app.js', './app.**.js', './index.html'] }),
+        new CleanWebpackPlugin({ cleanOnceBeforeBuildPatterns: ['./app.*', './app.**.*', './index.html'] }),
         new MiniCssExtractPlugin({
             filename: '[name].[hash].css',
         }),

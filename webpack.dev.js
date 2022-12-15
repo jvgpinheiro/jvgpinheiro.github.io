@@ -26,6 +26,6 @@ module.exports = merge(baseConfig, {
         new MiniCssPlugin({
             filename: '[name].css',
         }),
-        new CleanWebpackPlugin({ cleanOnceBeforeBuildPatterns: ['./app.js', './app.**.js', './index.html'] }),
+        new CleanWebpackPlugin({ cleanOnceBeforeBuildPatterns: ['./app.*', './app.**.*', './index.html'] }),
     ],
 });
