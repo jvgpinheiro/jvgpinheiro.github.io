@@ -10,7 +10,7 @@ module.exports = {
         alias: {
             vue$: 'vue/dist/vue.esm-browser.js',
             assets: path.resolve('./app/assets'),
-            src: path.resolve('./app/src'),
+            app: path.resolve('./app/'),
         },
     },
     module: {
