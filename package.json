@@ -19,6 +19,7 @@
     },
     "homepage": "https://github.com/jvgpinheiro/jvgpinheiro.github.io#readme",
     "devDependencies": {
+        "@types/stats.js": "^0.17.0",
         "@types/three": "^0.146.0",
         "clean-webpack-plugin": "^4.0.0",
         "css-loader": "^6.7.3",
@@ -37,6 +38,7 @@
         "webpack-merge": "^5.8.0"
     },
     "dependencies": {
+        "stats.js": "^0.17.0",
         "three": "^0.147.0",
         "vue": "^3.2.45"
     }

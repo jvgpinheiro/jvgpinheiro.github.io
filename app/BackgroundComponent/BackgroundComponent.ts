@@ -11,8 +11,12 @@ import {
     GridHelper,
     SphereGeometry,
     MathUtils,
+    Vector2,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
 import IntroComponent from './IntroComponent';
 
 function makeTorus(): Mesh {
@@ -39,9 +43,13 @@ class BackgroundComponent {
     private readonly pointLightHelper: PointLightHelper;
     private readonly gridHelper = new GridHelper(200, 50);
     private readonly orbitControls: OrbitControls;
+    private readonly bloomComposer: EffectComposer;
     private readonly fnAnimate = () => this.animate();
 
-    private readonly introComponent: IntroComponent;
+    public readonly BASE_LAYER = 0;
+    public readonly BLOOM_LAYER = 1;
+
+    // private readonly introComponent: IntroComponent;
 
     private isPaused: boolean = false;
 
@@ -49,15 +57,28 @@ class BackgroundComponent {
         this.renderer = new WebGLRenderer({ canvas, antialias: true });
         this.pointLightHelper = new PointLightHelper(this.pointLight);
         this.orbitControls = new OrbitControls(this.camera, this.canvas);
-        this.introComponent = new IntroComponent(this);
+        new IntroComponent(this);
+        this.bloomComposer = new EffectComposer(this.renderer);
         this.init();
         this.animate();
     }
 
     private init(): void {
+        this.initPostProcessing();
         this.initObjects();
+        this.initLayers();
         this.initScene();
         window.addEventListener('resize', () => this.resize());
+    }
+
+    private initPostProcessing(): void {
+        const renderPass = new RenderPass(this.scene, this.camera);
+        const bloomPass = new UnrealBloomPass(new Vector2(window.innerWidth, window.innerHeight), 1.5, 0, 0.3);
+        bloomPass.renderToScreen = true;
+        this.renderer.toneMappingExposure = Math.pow(0.9, 4.0);
+
+        this.bloomComposer.addPass(renderPass);
+        this.bloomComposer.addPass(bloomPass);
     }
 
     private initObjects(): void {
@@ -74,6 +95,7 @@ class BackgroundComponent {
         this.renderer.setPixelRatio(window.devicePixelRatio);
         if (this.canvas.width !== width || this.canvas.height !== height) {
             this.renderer.setSize(width, height, false);
+            this.bloomComposer.setSize(width, height);
             this.camera.aspect = width / height;
             this.camera.updateProjectionMatrix();
         }
@@ -90,23 +112,44 @@ class BackgroundComponent {
         }
     }
 
+    private initLayers(): void {
+        this.donut.layers.set(this.BASE_LAYER);
+        this.allStars.forEach((star) => star.layers.set(this.BLOOM_LAYER));
+        this.pointLight.layers.enableAll();
+        this.ambientLight.layers.enableAll();
+        this.camera.layers.enable(this.BLOOM_LAYER);
+    }
+
     private initScene(): void {
+        this.pointLight.layers.enable(1);
+        this.ambientLight.layers.enable(1);
         this.scene.add(this.donut);
         this.scene.add(this.pointLight, this.ambientLight);
         this.scene.add(this.pointLightHelper, this.gridHelper);
-        this.allStars.forEach((star) => this.scene.add(star));
+        this.allStars.forEach((star) => {
+            this.scene.add(star);
+        });
     }
 
     private animate(): void {
         requestAnimationFrame(this.fnAnimate);
+        this.renderer.autoClear = false;
         if (this.isPaused) {
             this.orbitControls.update();
             this.renderer.render(this.scene, this.camera);
             return;
         }
+        this.animateStars();
         this.animateDonut();
-        this.orbitControls.update();
+
+        this.renderer.clear();
+        this.camera.layers.set(this.BLOOM_LAYER);
+        this.bloomComposer.render();
+
+        this.renderer.clearDepth();
+        this.camera.layers.set(this.BASE_LAYER);
         this.renderer.render(this.scene, this.camera);
+        this.orbitControls.update();
     }
 
     private animateDonut(): void {
@@ -114,6 +157,15 @@ class BackgroundComponent {
         this.donut.rotation.y += 0.005;
         this.donut.rotation.z += 0.01;
         this.donut.material;
+    }
+
+    private animateStars(): void {
+        this.allStars.forEach((star) => {
+            const step = 0.03;
+            star.position.x += MathUtils.randFloatSpread(step);
+            star.position.y += MathUtils.randFloatSpread(step);
+            star.position.z += MathUtils.randFloatSpread(step);
+        });
     }
 
     public pause(): void {
