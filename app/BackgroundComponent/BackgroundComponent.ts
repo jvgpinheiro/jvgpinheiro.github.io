@@ -17,7 +17,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
-import IntroComponent from './IntroComponent';
+import IntroComponent from './IntroComponent/IntroComponent';
 
 function makeTorus(): Mesh {
     const geometry = new TorusGeometry(10, 4, 100, 100);
@@ -57,6 +57,7 @@ class BackgroundComponent {
         this.renderer = new WebGLRenderer({ canvas, antialias: true });
         this.pointLightHelper = new PointLightHelper(this.pointLight);
         this.orbitControls = new OrbitControls(this.camera, this.canvas);
+        // this.introComponent = new IntroComponent(this);
         new IntroComponent(this);
         this.bloomComposer = new EffectComposer(this.renderer);
         this.init();
@@ -156,7 +157,6 @@ class BackgroundComponent {
         this.donut.rotation.x += 0.01;
         this.donut.rotation.y += 0.005;
         this.donut.rotation.z += 0.01;
-        this.donut.material;
     }
 
     private animateStars(): void {

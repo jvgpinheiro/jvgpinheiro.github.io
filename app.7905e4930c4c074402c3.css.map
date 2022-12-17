@@ -1,1 +1,0 @@
-{"version":3,"file":"app.7905e4930c4c074402c3.css","mappings":"AAAA,kBACI,eACA,MACA,OACA,WACA,Y","sources":["webpack://jvgpinheiro.github.io/./app/styles.scss"],"sourcesContent":["canvas#background {\r\n    position: fixed;\r\n    top: 0;\r\n    left: 0;\r\n    width: 100%;\r\n    height: 100%;\r\n}\r\n"],"names":[],"sourceRoot":""}
