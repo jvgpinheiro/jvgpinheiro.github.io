@@ -1,4 +1,3 @@
-import { makeAnimationThrotler } from 'app/UtilsModule/FunctionUtils';
 import {
     Scene,
     PerspectiveCamera,
@@ -39,9 +38,7 @@ class BackgroundComponent {
     private readonly pointLightHelper: PointLightHelper;
     private readonly gridHelper = new GridHelper(200, 50);
     private readonly orbitControls: OrbitControls;
-    private readonly animationThrotler = makeAnimationThrotler();
     private readonly fnAnimate = () => this.animate();
-    private readonly fnResize = () => this.resize();
 
     private isPaused: boolean = false;
 
@@ -56,26 +53,26 @@ class BackgroundComponent {
     private init(): void {
         this.initObjects();
         this.initScene();
-        window.addEventListener('resize', () => this.animationThrotler(this.fnResize));
+        window.addEventListener('resize', () => this.resize());
     }
 
     private initObjects(): void {
         this.camera.position.set(0, 30, 150);
+        this.camera.setFocalLength(10);
         this.resize();
         this.pointLight.position.set(5, 5, 5);
         this.initStarObjects();
     }
 
     private resize(): void {
+        const width = this.canvas.clientWidth;
+        const height = this.canvas.clientHeight;
         this.renderer.setPixelRatio(window.devicePixelRatio);
-        const rendererWidth = Math.max(window.innerWidth, 3200);
-        const rendererHeight = Math.max(window.innerHeight, 2400);
-        this.renderer.setSize(rendererWidth, rendererHeight);
-
-        const leftOffset = (window.innerWidth - rendererWidth) / 2;
-        const topOffset = (window.innerHeight - rendererHeight) / 2;
-        this.canvas.style.left = `${leftOffset}px`;
-        this.canvas.style.top = `${topOffset}px`;
+        if (this.canvas.width !== width || this.canvas.height !== height) {
+            this.renderer.setSize(width, height, false);
+            this.camera.aspect = width / height;
+            this.camera.updateProjectionMatrix();
+        }
     }
 
     private initStarObjects(): void {
@@ -112,6 +109,7 @@ class BackgroundComponent {
         this.donut.rotation.x += 0.01;
         this.donut.rotation.y += 0.005;
         this.donut.rotation.z += 0.01;
+        this.donut.material;
     }
 
     public pause(): void {
