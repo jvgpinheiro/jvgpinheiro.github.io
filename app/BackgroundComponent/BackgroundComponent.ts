@@ -13,6 +13,7 @@ import {
     MathUtils,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import IntroComponent from './IntroComponent';
 
 function makeTorus(): Mesh {
     const geometry = new TorusGeometry(10, 4, 100, 100);
@@ -28,9 +29,9 @@ function makeStar(): Mesh {
 }
 
 class BackgroundComponent {
-    private readonly scene = new Scene();
-    private readonly camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    private readonly renderer: WebGLRenderer;
+    public readonly scene = new Scene();
+    public readonly camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    public readonly renderer: WebGLRenderer;
     private readonly donut = makeTorus();
     private readonly allStars: Set<Mesh> = new Set();
     private readonly pointLight = new PointLight(0xffffff);
@@ -40,12 +41,15 @@ class BackgroundComponent {
     private readonly orbitControls: OrbitControls;
     private readonly fnAnimate = () => this.animate();
 
+    private readonly introComponent: IntroComponent;
+
     private isPaused: boolean = false;
 
     constructor(private readonly canvas: HTMLCanvasElement) {
-        this.renderer = new WebGLRenderer({ canvas });
+        this.renderer = new WebGLRenderer({ canvas, antialias: true });
         this.pointLightHelper = new PointLightHelper(this.pointLight);
         this.orbitControls = new OrbitControls(this.camera, this.canvas);
+        this.introComponent = new IntroComponent(this);
         this.init();
         this.animate();
     }
@@ -76,10 +80,10 @@ class BackgroundComponent {
     }
 
     private initStarObjects(): void {
-        for (let i = 0; i < 1000; i++) {
-            const x = MathUtils.randFloatSpread(700);
+        for (let i = 0; i < 500; i++) {
+            const x = MathUtils.randFloatSpread(1000);
             const y = MathUtils.randFloatSpread(300) + 100;
-            const z = MathUtils.randFloatSpread(400);
+            const z = MathUtils.randFloatSpread(300) - 200;
             const star = makeStar();
             star.position.set(x, y, z);
             this.allStars.add(star);
