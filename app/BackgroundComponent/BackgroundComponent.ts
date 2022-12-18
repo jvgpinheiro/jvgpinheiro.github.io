@@ -1,3 +1,4 @@
+import { smoothScroll } from 'app/ScrollModule/SmoothScrollControl';
 import {
     Scene,
     PerspectiveCamera,
@@ -69,7 +70,7 @@ class BackgroundComponent {
         this.initObjects();
         this.initLayers();
         this.initScene();
-        window.addEventListener('resize', () => this.resize());
+        this.initEvents();
     }
 
     private initPostProcessing(): void {
@@ -103,9 +104,9 @@ class BackgroundComponent {
     }
 
     private initStarObjects(): void {
-        for (let i = 0; i < 500; i++) {
-            const x = MathUtils.randFloatSpread(1000);
-            const y = MathUtils.randFloatSpread(300) + 100;
+        for (let i = 0; i < 1000; i++) {
+            const x = MathUtils.randFloatSpread(2000);
+            const y = MathUtils.randFloatSpread(600) + 200;
             const z = MathUtils.randFloatSpread(300) - 200;
             const star = makeStar();
             star.position.set(x, y, z);
@@ -132,24 +133,37 @@ class BackgroundComponent {
         });
     }
 
+    private initEvents(): void {
+        window.addEventListener('resize', () => this.resize());
+        this.canvas.addEventListener('wheel', (event) => {
+            event.preventDefault();
+            smoothScroll({
+                element: this.canvas,
+                direction: event.deltaY > 0 ? 'bottom' : 'top',
+                duration: 200,
+                cubicBezierPoints: { x1: 0.2, x2: 0.7, y1: 0.5, y2: 0.9 },
+                ammountToScroll: 5,
+                onRefUpdateCallback: (amountScrolled) => {
+                    this.camera.position.z += amountScrolled;
+                },
+            });
+        });
+    }
+
     private animate(): void {
         requestAnimationFrame(this.fnAnimate);
         this.renderer.autoClear = false;
         if (this.isPaused) {
+            this.animateBloomLayer();
+            this.animateBaseLayer();
             this.orbitControls.update();
-            this.renderer.render(this.scene, this.camera);
             return;
         }
         this.animateStars();
         this.animateDonut();
-
-        this.renderer.clear();
-        this.camera.layers.set(this.BLOOM_LAYER);
-        this.bloomComposer.render();
-
-        this.renderer.clearDepth();
-        this.camera.layers.set(this.BASE_LAYER);
-        this.renderer.render(this.scene, this.camera);
+        this.animateBloomLayer();
+        this.animateBaseLayer();
+        this.orbitControls.enableZoom = false;
         this.orbitControls.update();
     }
 
@@ -166,6 +180,18 @@ class BackgroundComponent {
             star.position.y += MathUtils.randFloatSpread(step);
             star.position.z += MathUtils.randFloatSpread(step);
         });
+    }
+
+    private animateBloomLayer(): void {
+        this.renderer.clear();
+        this.camera.layers.set(this.BLOOM_LAYER);
+        this.bloomComposer.render();
+    }
+
+    private animateBaseLayer(): void {
+        this.renderer.clearDepth();
+        this.camera.layers.set(this.BASE_LAYER);
+        this.renderer.render(this.scene, this.camera);
     }
 
     public pause(): void {
